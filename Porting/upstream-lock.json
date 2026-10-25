@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "name": "@ai-sdk/deepseek",
+      "reviewedVersion": "3.0.73",
+      "ledgerKind": "provider",
+      "evidence": "`AIProviders.deepSeek`, `DeepSeekLanguageModel`, `DeepSeekFileClient`, `DeepSeekProviderTests.swift`, `DeepSeekVisionAndFilesUpstreamParityTests.swift`",
+      "reviewStatus": "imported-reviewed-with-gaps",
+      "archiveIntegrity": "sha512-Ut7tXu4mKWXxY6pQfx/3EQZpvjfql0DEGtPCgCAvT5yz3zfuAuq9jHKELK07Ft15rQGM5gvAlWE7sAIsz8ZvDw==",
+      "sourceRef": "npm:@ai-sdk/deepseek@3.0.73",
+      "testRef": "682e2dd71456f14f9da33a1b983d1998c3a1184c",
+      "testRefRelationship": "inventory-snapshot-not-release-verified",
+      "contractFamilies": [],
+      "contractReview": "not-imported; inspect upstream declarations before extraction"
+    }
+  ]
+}

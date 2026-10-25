@@ -1,0 +1,16 @@
+[
+  {
+    "order": 16,
+    "providerID": "deepseek",
+    "upstreamPackage": "@ai-sdk/deepseek",
+    "factoryNames": [
+      "AIProviders.deepSeek"
+    ],
+    "capabilities": [
+      "language"
+    ],
+    "files": true,
+    "skills": false,
+    "notes": "DeepSeek chat models mirror upstream DeepSeek 3.0.73: `DEEPSEEK_API_KEY`, custom base URL and headers, callable/language/chat aliases, `deepseek.chat` provider IDs, versioned user-agent suffix, reasoning/thinking mapping, providerOptions.deepseek thinking and reasoningEffort schema, cache-aware usage/provider metadata, JSON response instruction injection, generated fallback IDs for missing generate tool-call IDs, streaming response metadata, stream usage, OpenAI-compatible tool calls including strict mode, DeepSeek V4 assistant reasoning_content rules, V4 Flash Vision Exp inline, URL, and provider-reference images, Files V4 upload with `user_data`, expiry validation and structured errors, and unsupported embedding/image-generation families. The 3.0.37 pass also covered model-aware reasoning/sampling rules, log probabilities, user/message metadata, strict function-tool preparation, upload preflight and response metadata, complete usage, and typed stream failures. ProviderV4 type names, ESM-only packaging, Node 22 engines, and workflow serialization helpers are JS-only upstream concerns. The 2026-09-20 pass aligns empty-choice failures with the exact upstream structural error. The 2026-09-27 pass preserves multimodal V4 and Flash tool-result text, provider references, URL and base64 images, and rejects unsupported image URL media types. Standard cached prompt-token details are used when provider-specific cache-hit counts are absent. The 2026-10-11 pass: Common xhigh and max reasoning both map to max; native file bytes already cover the published Blob type-only cleanup. The 2026-10-18 pass: Future DeepSeek models use the V4 protocol unless recognized as legacy chat/reasoner/R1/V3 identifiers."
+  }
+]

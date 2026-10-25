@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "package": "swift-ai-deepseek",
+  "version": "1.0.0",
+  "releaseID": "modular-3",
+  "source": {
+    "commit": "7fc9b4cd72f8f83b75ba7eee2e38d37127539317",
+    "baseCommit": "7fc9b4cd72f8f83b75ba7eee2e38d37127539317",
+    "workingTree": false,
+    "inputsSHA256": "49b802ba4a30454f78c9886ab3114537ef659ab3e6db7775479b7351f6e3f0ab"
+  },
+  "dependencies": [
+    {
+      "package": "swift-ai-core",
+      "from": "1.1.0"
+    }
+  ],
+  "changes": [
+    {
+      "id": "remaining-package-extraction",
+      "notes": "Extract the existing runtime, typed settings and standalone tests from the compatibility aggregate. Preserve the reviewed npm baseline and existing capability/gap boundaries.",
+      "compatibility": "Initial independent Swift package version. Existing SwiftAISDK entry points remain in the development compatibility facade; no npm-version equivalence is implied."
+    }
+  ],
+  "canonicalDirectory": "Packages/swift-ai-deepseek",
+  "upstream": [
+    {
+      "name": "@ai-sdk/deepseek",
+      "reviewedVersion": "3.0.73",
+      "ledgerKind": "provider",
+      "evidence": "`AIProviders.deepSeek`, `DeepSeekLanguageModel`, `DeepSeekFileClient`, `DeepSeekProviderTests.swift`, `DeepSeekVisionAndFilesUpstreamParityTests.swift`",
+      "reviewStatus": "imported-reviewed-with-gaps",
+      "archiveIntegrity": "sha512-Ut7tXu4mKWXxY6pQfx/3EQZpvjfql0DEGtPCgCAvT5yz3zfuAuq9jHKELK07Ft15rQGM5gvAlWE7sAIsz8ZvDw==",
+      "sourceRef": "npm:@ai-sdk/deepseek@3.0.73",
+      "testRef": "682e2dd71456f14f9da33a1b983d1998c3a1184c",
+      "testRefRelationship": "inventory-snapshot-not-release-verified",
+      "contractFamilies": [],
+      "contractReview": "not-imported; inspect upstream declarations before extraction"
+    }
+  ],
+  "note": "Independent port. Imported test refs and contract review gaps retain their original status; export is not new upstream parity proof.",
+  "canonicalInputs": [
+    {
+      "canonicalPath": ".github/workflows/package-check.yml",
+      "sha256": "7ff448e130f7aed96c38accdf828b6d993997ebc5317358347e9a70a649e67ca"
+    },
+    {
+      "canonicalPath": "LICENSE",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Package.swift",
+      "sha256": "35a29669dc8108b3532f1af0cc7ae4f5eab025a3a4e1624f57050644e6753330"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Porting/map.json",
+      "sha256": "626632ea28953b70685aabb99232676a56abeeb88583c375dd6de714a195784e"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/README.md",
+      "sha256": "34cfb6ccb1f14dfeaf344c4832c57c20a60bb2f093c2c8819dc96a00b73f35c6"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekFiles.swift",
+      "sha256": "12a28b17f65c69875f9e5cf751e3b9059f1a2f37f0a6356ff0223397cbb20acd"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekModels.swift",
+      "sha256": "58da3eb96393e73ea9ae0e4497466ee39ecda337592ae3cd7ecf11664caa16b3"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekOptions.swift",
+      "sha256": "20b95575717f11d053861b59d89224cb17575635fe7e485e8e438e265860f1af"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekProvider.swift",
+      "sha256": "ca42b31e32609c1732974b9a25a87c964a66b76f5f949ac203df61b77c2db566"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekRequestPreparation.swift",
+      "sha256": "f74f52804583efe649d4293b6166d72fc327fc83f4a7bfcb0fc16014a387104c"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekToolsAndParsing.swift",
+      "sha256": "20fb567b8716c5a163fcd22a06c2b443acbe5b0dd36f2c58425adbe1bea23502"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekProviderTests.swift",
+      "sha256": "6043c4fc394caf081fc33cf55c9733169b6c1ccd147a2e0fa51cb57be3432027"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekVisionAndFilesUpstreamParityTests.swift",
+      "sha256": "a35324a442f373cbc3ed320d340016c5027f391a785c07b87088cfb56ab6e749"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/FixtureDownloadTransport.swift",
+      "sha256": "c82d8682ffd739a3e8ac8337f365621cb38da0b3e038eff3c6a83887b3c1b259"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/TestSupport.swift",
+      "sha256": "19545c169cd519bf49c4a2f06a6b349abda1d14d36a6e58187b385a4b0cacd2b"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "package": "swift-ai-deepseek",
+  "status": "coarse-import",
+  "upstream": [
+    {
+      "name": "@ai-sdk/deepseek",
+      "implementation": [
+        "packages/deepseek/src"
+      ],
+      "tests": [
+        "packages/deepseek/src/chat/convert-to-deepseek-chat-messages.test.ts",
+        "packages/deepseek/src/chat/convert-to-deepseek-usage.test.ts",
+        "packages/deepseek/src/chat/deepseek-chat-language-model.test.ts",
+        "packages/deepseek/src/chat/deepseek-internal-options.test.ts",
+        "packages/deepseek/src/chat/deepseek-lazy-schemas.test.ts",
+        "packages/deepseek/src/chat/deepseek-prepare-tools.test.ts",
+        "packages/deepseek/src/chat/deepseek-raw-usage.test.ts",
+        "packages/deepseek/src/chat/is-deepseek-v4-model.test.ts",
+        "packages/deepseek/src/files/deepseek-files.test.ts"
+      ]
+    }
+  ],
+  "swift": {
+    "sources": [
+      "Sources/SwiftAIDeepSeek/DeepSeekFiles.swift",
+      "Sources/SwiftAIDeepSeek/DeepSeekModels.swift",
+      "Sources/SwiftAIDeepSeek/DeepSeekOptions.swift",
+      "Sources/SwiftAIDeepSeek/DeepSeekProvider.swift",
+      "Sources/SwiftAIDeepSeek/DeepSeekRequestPreparation.swift",
+      "Sources/SwiftAIDeepSeek/DeepSeekToolsAndParsing.swift"
+    ],
+    "tests": [
+      "Tests/SwiftAIDeepSeekTests/DeepSeekProviderTests.swift",
+      "Tests/SwiftAIDeepSeekTests/DeepSeekVisionAndFilesUpstreamParityTests.swift",
+      "Tests/SwiftAIDeepSeekTests/FixtureDownloadTransport.swift",
+      "Tests/SwiftAIDeepSeekTests/TestSupport.swift"
+    ],
+    "resources": []
+  },
+  "differences": [
+    {
+      "kind": "native-adaptation",
+      "reason": "Preserve Swift async/await, Sendable, Foundation transport and existing documented gaps; see Docs/CoreV6Parity.md and PortingStatus.md."
+    }
+  ],
+  "reviewNote": "M6: DeepSeek owns chat, Files, its typed settings, Azure hosting configuration and focused tests. Prior baseline and documented gaps retained. The Azure-specific test remains in the workspace.",
+  "canonicalOnlyReferences": [],
+  "canonicalDirectory": "Packages/swift-ai-deepseek"
+}

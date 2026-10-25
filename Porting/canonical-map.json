@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "package": "swift-ai-deepseek",
+  "status": "coarse-import",
+  "upstream": [
+    {
+      "name": "@ai-sdk/deepseek",
+      "implementation": [
+        "packages/deepseek/src"
+      ],
+      "tests": [
+        "packages/deepseek/src/chat/convert-to-deepseek-chat-messages.test.ts",
+        "packages/deepseek/src/chat/convert-to-deepseek-usage.test.ts",
+        "packages/deepseek/src/chat/deepseek-chat-language-model.test.ts",
+        "packages/deepseek/src/chat/deepseek-internal-options.test.ts",
+        "packages/deepseek/src/chat/deepseek-lazy-schemas.test.ts",
+        "packages/deepseek/src/chat/deepseek-prepare-tools.test.ts",
+        "packages/deepseek/src/chat/deepseek-raw-usage.test.ts",
+        "packages/deepseek/src/chat/is-deepseek-v4-model.test.ts",
+        "packages/deepseek/src/files/deepseek-files.test.ts"
+      ]
+    }
+  ],
+  "swift": {
+    "sources": [
+      "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekFiles.swift",
+      "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekModels.swift",
+      "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekOptions.swift",
+      "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekProvider.swift",
+      "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekRequestPreparation.swift",
+      "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekToolsAndParsing.swift"
+    ],
+    "tests": [
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekProviderTests.swift",
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekVisionAndFilesUpstreamParityTests.swift",
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/FixtureDownloadTransport.swift",
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/TestSupport.swift"
+    ],
+    "resources": []
+  },
+  "differences": [
+    {
+      "kind": "native-adaptation",
+      "reason": "Preserve Swift async/await, Sendable, Foundation transport and existing documented gaps; see Docs/CoreV6Parity.md and PortingStatus.md."
+    }
+  ],
+  "reviewNote": "M6: DeepSeek owns chat, Files, its typed settings, Azure hosting configuration and focused tests. Prior baseline and documented gaps retained. The Azure-specific test remains in the workspace."
+}
