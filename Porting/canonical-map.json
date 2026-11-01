@@ -34,7 +34,9 @@
       "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekProviderTests.swift",
       "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekVisionAndFilesUpstreamParityTests.swift",
       "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/FixtureDownloadTransport.swift",
-      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/TestSupport.swift"
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/TestSupport.swift",
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261101BehaviorTests.swift",
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261101CredentialsTests.swift"
     ],
     "resources": []
   },
@@ -42,7 +44,11 @@
     {
       "kind": "native-adaptation",
       "reason": "Preserve Swift async/await, Sendable, Foundation transport and existing documented gaps; see Docs/CoreV6Parity.md and PortingStatus.md."
+    },
+    {
+      "kind": "native-adaptation",
+      "reason": "2026-11-01: integrity-verified @ai-sdk/deepseek 3.0.73 -> 3.0.77 source/declarations reviewed with exact matching-release tests 612be2311464804d1e4897afacbf8f3fc2f6d9e3 -> 9b603d36186b75e58d5479445a96c76f6e2d2700; focused Weekly20261101 assertions cover the published deltas and native credential settings. Existing coarse/imported mappings and earlier gaps remain unpromoted. Portable medium maps to low and xhigh maps to high against low/high/max, with matching generation/stream warnings; explicit provider effort retains existing canonical normalization/precedence. Explicit thinking settings no longer suppress independent portable effort mapping; provider-default leaves the field omitted, matching source request policy. Add lazy apiKeyProvider across language/files requests via shared credential-aware transport."
     }
   ],
-  "reviewNote": "M6: DeepSeek owns chat, Files, its typed settings, Azure hosting configuration and focused tests. Prior baseline and documented gaps retained. The Azure-specific test remains in the workspace."
+  "reviewNote": "M6: DeepSeek owns chat, Files, its typed settings, Azure hosting configuration and focused tests. Prior baseline and documented gaps retained. The Azure-specific test remains in the workspace. 2026-11-01: integrity-verified @ai-sdk/deepseek 3.0.73 -> 3.0.77 source/declarations reviewed with exact matching-release tests 612be2311464804d1e4897afacbf8f3fc2f6d9e3 -> 9b603d36186b75e58d5479445a96c76f6e2d2700; focused Weekly20261101 assertions cover the published deltas and native credential settings. Existing coarse/imported mappings and earlier gaps remain unpromoted."
 }

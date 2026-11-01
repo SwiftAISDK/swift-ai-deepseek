@@ -155,39 +155,14 @@ func deepSeekReasoningEffort(_ value: String) -> String {
 }
 
 func deepSeekApplyReasoning(_ reasoning: String?, to body: inout [String: JSONValue]) -> [AIWarning] {
-    guard let reasoning, body["thinking"] == nil else { return [] }
-    if reasoning == "none" {
-        body["thinking"] = .object(["type": .string("disabled")])
-        body.removeValue(forKey: "reasoning_effort")
-        return []
+    guard let reasoning, isCustomReasoning(reasoning) else { return [] }
+    if body["thinking"] == nil {
+        body["thinking"] = ["type": .string(reasoning == "none" ? "disabled" : "enabled")]
     }
-    body["thinking"] = .object(["type": .string("enabled")])
     var warnings: [AIWarning] = []
-    if body["reasoning_effort"] == nil,
-       let effort = deepSeekReasoningEffort(from: reasoning) {
+    if reasoning != "none", body["reasoning_effort"] == nil,
+       let effort = mapReasoningToProviderEffort(reasoning: reasoning, effortMap: ["low": "low", "high": "high", "max": "max"], warnings: &warnings) {
         body["reasoning_effort"] = .string(effort)
-        if effort != reasoning {
-            warnings.append(AIWarning(
-                type: "compatibility",
-                feature: "reasoning",
-                message: "reasoning \"\(reasoning)\" is not directly supported by this model. mapped to effort \"\(effort)\"."
-            ))
-        }
     }
     return warnings
-}
-
-func deepSeekReasoningEffort(from reasoning: String) -> String? {
-    switch reasoning {
-    case "minimal", "low":
-        return "low"
-    case "medium":
-        return "medium"
-    case "high":
-        return "high"
-    case "xhigh", "max":
-        return "max"
-    default:
-        return nil
-    }
 }

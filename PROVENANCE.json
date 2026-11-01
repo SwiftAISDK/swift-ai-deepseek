@@ -1,41 +1,44 @@
 {
   "schemaVersion": 1,
   "package": "swift-ai-deepseek",
-  "version": "1.0.0",
-  "releaseID": "modular-3",
+  "version": "1.1.0",
+  "releaseID": "weekly-upstream-20261101",
   "source": {
-    "commit": "7fc9b4cd72f8f83b75ba7eee2e38d37127539317",
-    "baseCommit": "7fc9b4cd72f8f83b75ba7eee2e38d37127539317",
+    "commit": "ea057797494ab9bb66df8c6bfd8edc10245b20e7",
+    "baseCommit": "ea057797494ab9bb66df8c6bfd8edc10245b20e7",
     "workingTree": false,
-    "inputsSHA256": "49b802ba4a30454f78c9886ab3114537ef659ab3e6db7775479b7351f6e3f0ab"
+    "inputsSHA256": "b46f3e07b0a583d6fee81035987d74a06fc5c6109cbdf228144d1172d2c3676e"
   },
   "dependencies": [
     {
       "package": "swift-ai-core",
-      "from": "1.1.0"
+      "from": "1.2.0"
     }
   ],
   "changes": [
     {
-      "id": "remaining-package-extraction",
-      "notes": "Extract the existing runtime, typed settings and standalone tests from the compatibility aggregate. Preserve the reviewed npm baseline and existing capability/gap boundaries.",
-      "compatibility": "Initial independent Swift package version. Existing SwiftAISDK entry points remain in the development compatibility facade; no npm-version equivalence is implied."
+      "id": "weekly-upstream-20261101",
+      "notes": "Portable medium maps to low and xhigh maps to high against low/high/max, with matching generation/stream warnings; explicit provider effort retains existing canonical normalization/precedence. Explicit thinking settings no longer suppress independent portable effort mapping; provider-default leaves the field omitted, matching source request policy. Reviewed upstream: @ai-sdk/deepseek 3.0.73 to 3.0.77. Validation passed: node Scripts/test-packages.mjs (all 52 owning package suites and the compatibility facade); node Scripts/sdk.mjs generate --check; node --test Scripts/tests/*.test.cjs (27 passed); docs-site check and build (100 pages). Live provider calls were not run.",
+      "compatibility": "Minor release for additive native API; existing static settings and call sites remain compatible. Updated direct dependency minimums are recorded in the manifest. Existing documented JS/framework and native product gaps remain; version-delta review does not imply full parity or live-service testing. Explicit custom authentication skips an unused credential supplier, a deliberate native callback-order adaptation."
     }
   ],
   "canonicalDirectory": "Packages/swift-ai-deepseek",
   "upstream": [
     {
       "name": "@ai-sdk/deepseek",
-      "reviewedVersion": "3.0.73",
+      "reviewedVersion": "3.0.77",
       "ledgerKind": "provider",
-      "evidence": "`AIProviders.deepSeek`, `DeepSeekLanguageModel`, `DeepSeekFileClient`, `DeepSeekProviderTests.swift`, `DeepSeekVisionAndFilesUpstreamParityTests.swift`",
+      "evidence": "`AIProviders.deepSeek`, `DeepSeekLanguageModel`, `DeepSeekFileClient`, `DeepSeekProviderTests.swift`, `DeepSeekVisionAndFilesUpstreamParityTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json",
       "reviewStatus": "imported-reviewed-with-gaps",
-      "archiveIntegrity": "sha512-Ut7tXu4mKWXxY6pQfx/3EQZpvjfql0DEGtPCgCAvT5yz3zfuAuq9jHKELK07Ft15rQGM5gvAlWE7sAIsz8ZvDw==",
-      "sourceRef": "npm:@ai-sdk/deepseek@3.0.73",
-      "testRef": "682e2dd71456f14f9da33a1b983d1998c3a1184c",
-      "testRefRelationship": "inventory-snapshot-not-release-verified",
-      "contractFamilies": [],
-      "contractReview": "not-imported; inspect upstream declarations before extraction"
+      "archiveIntegrity": "sha512-2+YBeWe98pDCiUdBwmcJBGZLnkHtM+XEe8Fd9juaN5shxcyQUj/z5SDDfBsDCLdpnk/gocXzb4Zoj636ATgRKA==",
+      "sourceRef": "npm:@ai-sdk/deepseek@3.0.77",
+      "testRef": "9b603d36186b75e58d5479445a96c76f6e2d2700",
+      "testRefRelationship": "matching-release",
+      "contractFamilies": [
+        "LanguageModelV4",
+        "ProviderV4"
+      ],
+      "contractReview": "2026-11-01: published declarations, source and exact matching-release changed tests reviewed; scoped dispositions and Swift translations are in Docs/WeeklyUpstreamAudit20261101.json. Existing broader product gaps remain; reviewed delta is not full-package parity."
     }
   ],
   "note": "Independent port. Imported test refs and contract review gaps retain their original status; export is not new upstream parity proof.",
@@ -54,7 +57,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Porting/map.json",
-      "sha256": "626632ea28953b70685aabb99232676a56abeeb88583c375dd6de714a195784e"
+      "sha256": "c14c7fcfe0e303dfff1180cbecf518f3d2560decc259806479cc87e352645ad5"
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/README.md",
@@ -70,11 +73,11 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekOptions.swift",
-      "sha256": "20b95575717f11d053861b59d89224cb17575635fe7e485e8e438e265860f1af"
+      "sha256": "0fba648d31816af37e82c7197a88b24b05f3a74a193b38b31b40430a15ef94cc"
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekProvider.swift",
-      "sha256": "ca42b31e32609c1732974b9a25a87c964a66b76f5f949ac203df61b77c2db566"
+      "sha256": "e29e7ae43f6e42b01470f16019dfdc584484554276d32ddcb6ed4901191af4b9"
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekRequestPreparation.swift",
@@ -86,7 +89,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekProviderTests.swift",
-      "sha256": "6043c4fc394caf081fc33cf55c9733169b6c1ccd147a2e0fa51cb57be3432027"
+      "sha256": "4cc7e320cd43d69f176fdc90541dcd040615186a04a130261ab0e3b81754c569"
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekVisionAndFilesUpstreamParityTests.swift",
@@ -99,6 +102,14 @@
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/TestSupport.swift",
       "sha256": "19545c169cd519bf49c4a2f06a6b349abda1d14d36a6e58187b385a4b0cacd2b"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261101BehaviorTests.swift",
+      "sha256": "316a72f2c94e4a865007e813b59056d13c43aad79a1c73398424739af5e99990"
+    },
+    {
+      "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261101CredentialsTests.swift",
+      "sha256": "8bed6ed704219fb2d4ecd2afa9f839829ef67f4e13b84dba4845c1d6255ca51b"
     }
   ]
 }

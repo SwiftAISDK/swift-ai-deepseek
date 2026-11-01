@@ -175,7 +175,7 @@ import SwiftAI
 
     let request = try #require(await transport.requests().first)
     #expect(request.headers["authorization"] == "Bearer deepseek-key")
-    #expect(request.headers["user-agent"] == "custom-client/1.0 ai-sdk-deepseek/3.0.73")
+    #expect(request.headers["user-agent"] == "custom-client/1.0 ai-sdk-deepseek/3.0.77")
 }
 
 @Test func deepSeekLanguageGeneratesMissingToolCallIDLikeUpstreamV4() async throws {
@@ -238,7 +238,7 @@ import SwiftAI
     #expect(model.providerID == "deepseek.chat")
     let body = try decodeJSONBody(try #require((await transport.requests()).first?.body))
     #expect(body["thinking"]?["type"]?.stringValue == "enabled")
-    #expect(body["reasoning_effort"]?.stringValue == "max")
+    #expect(body["reasoning_effort"]?.stringValue == "high")
 }
 
 @Test func deepSeekTopLevelReasoningCompatibilityWarnings() async throws {
@@ -263,7 +263,7 @@ import SwiftAI
         AIWarning(
             type: "compatibility",
             feature: "reasoning",
-            message: "reasoning \"xhigh\" is not directly supported by this model. mapped to effort \"max\"."
+            message: "reasoning \"xhigh\" is not directly supported by this model. mapped to effort \"high\"."
         )
     ])
 
@@ -271,7 +271,7 @@ import SwiftAI
     let minimalBody = try decodeJSONBody(try #require(requests[0].body))
     let xhighBody = try decodeJSONBody(try #require(requests[1].body))
     #expect(minimalBody["reasoning_effort"]?.stringValue == "low")
-    #expect(xhighBody["reasoning_effort"]?.stringValue == "max")
+    #expect(xhighBody["reasoning_effort"]?.stringValue == "high")
 }
 
 @Test func deepSeekProviderReasoningEffortPassesThrough() async throws {
