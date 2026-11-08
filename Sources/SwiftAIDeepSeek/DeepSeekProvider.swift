@@ -39,7 +39,7 @@ public final class DeepSeekProvider: AIFileProvider, Sendable {
         }
         var headers = normalizeHeaders(configuration.headers)
         headers["authorization"] = headers["authorization"] ?? "Bearer \(key)"
-        headers = withUserAgentSuffix(headers, "ai-sdk-deepseek/3.0.77")
+        headers = withUserAgentSuffix(headers, "ai-sdk-deepseek/3.0.81")
         let baseURL = withoutTrailingSlash(configuration.baseURL ?? "https://api.deepseek.com")
         let http = AIProviderHTTPClient(providerID: "deepseek", headers: headers, transport: configuration.transport,
             url: { _, path in try providerURL("\(baseURL)\(path)", queryParams: configuration.queryParams) })

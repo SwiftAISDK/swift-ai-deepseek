@@ -100,7 +100,7 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
             supportsThinking: config.supportsThinking,
             supportsStructuredOutputs: config.supportsStructuredOutputs,
             supportsAssistantPrefixCompletion: config.baseURL.hasSuffix("/beta"),
-            supportsStrictToolCalls: config.baseURL.hasSuffix("/beta"),
+            supportsStrictToolCalls: providerID.hasPrefix("azure.") ? nil : config.baseURL.hasSuffix("/beta"),
             supportsPenaltySampling: providerID.hasPrefix("azure."),
             providerOptionsName: providerID.split(separator: ".").first.map(String.init) ?? "deepseek"
         )
@@ -145,7 +145,7 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
                         supportsThinking: config.supportsThinking,
                         supportsStructuredOutputs: config.supportsStructuredOutputs,
                         supportsAssistantPrefixCompletion: config.baseURL.hasSuffix("/beta"),
-                        supportsStrictToolCalls: config.baseURL.hasSuffix("/beta"),
+                        supportsStrictToolCalls: providerID.hasPrefix("azure.") ? nil : config.baseURL.hasSuffix("/beta"),
                         supportsPenaltySampling: providerID.hasPrefix("azure."),
                         providerOptionsName: providerID.split(separator: ".").first.map(String.init) ?? "deepseek"
                     )

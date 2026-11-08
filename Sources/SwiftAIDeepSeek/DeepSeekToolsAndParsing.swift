@@ -4,7 +4,9 @@ import SwiftAITransport
 import SwiftAIProviderUtilities
 
 
-func deepSeekTools(from tools: [String: JSONValue], supportsStrictToolCalls: Bool = true) throws -> DeepSeekPreparedTools {
+// A hosted endpoint with unknown strict-tool support forwards the caller's
+// choice; only explicit native support applies DeepSeek's beta-mode policy.
+func deepSeekTools(from tools: [String: JSONValue], supportsStrictToolCalls: Bool? = true) throws -> DeepSeekPreparedTools {
     var warnings: [AIWarning] = []
     let functionTools = tools.filter { _, schema in
         let object = schema.objectValue
@@ -13,10 +15,10 @@ func deepSeekTools(from tools: [String: JSONValue], supportsStrictToolCalls: Boo
     let strictValues = functionTools.compactMap { _, schema -> Bool? in
         schema.objectValue?["strict"]?.boolValue
     }
-    if strictValues.contains(true), !supportsStrictToolCalls {
+    if strictValues.contains(true), supportsStrictToolCalls == false {
         throw AIError.invalidArgument(argument: "tools", message: "DeepSeek strict tool calls require a beta base URL ending in /beta.")
     }
-    if supportsStrictToolCalls,
+    if supportsStrictToolCalls == true,
        strictValues.contains(true),
        strictValues.count != functionTools.count || strictValues.contains(false) {
         throw AIError.invalidArgument(argument: "tools", message: "DeepSeek strict mode requires every function tool in the request to set strict true.")

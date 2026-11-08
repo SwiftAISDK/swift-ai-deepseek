@@ -11,7 +11,7 @@ func deepSeekPreparedCall(
     supportsThinking: Bool = true,
     supportsStructuredOutputs: Bool = false,
     supportsAssistantPrefixCompletion: Bool = false,
-    supportsStrictToolCalls: Bool = false,
+    supportsStrictToolCalls: Bool? = false,
     supportsPenaltySampling: Bool = false,
     providerOptionsName: String = "deepseek"
 ) throws -> DeepSeekPreparedCall {
@@ -288,7 +288,7 @@ func deepSeekMessages(
                         "type": .string("function"),
                         "function": .object([
                             "name": .string(call.name),
-                            "arguments": .string(call.arguments)
+                            "arguments": .string(deepSeekSerializeToolCallArguments(call.arguments))
                         ])
                     ])
                 })
@@ -604,4 +604,8 @@ func deepSeekUserPartFeature(_ part: AIContentPart) -> String {
 
 func deepSeekText(from message: AIMessage) -> String {
     message.content.compactMap(\.text).joined()
+}
+private func deepSeekSerializeToolCallArguments(_ input: String) -> String {
+    if (try? decodeJSONBody(Data(input.utf8))) != nil { return input }
+    return canonicalJSONText(.string(input)) ?? input
 }
