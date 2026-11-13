@@ -39,7 +39,7 @@ public final class DeepSeekProvider: AIFileProvider, Sendable {
         }
         var headers = normalizeHeaders(configuration.headers)
         headers["authorization"] = headers["authorization"] ?? "Bearer \(key)"
-        headers = withUserAgentSuffix(headers, "ai-sdk-deepseek/3.0.81")
+        headers = withUserAgentSuffix(headers, "ai-sdk-deepseek/3.0.86")
         let baseURL = withoutTrailingSlash(configuration.baseURL ?? "https://api.deepseek.com")
         let http = AIProviderHTTPClient(providerID: "deepseek", headers: headers, transport: configuration.transport,
             url: { _, path in try providerURL("\(baseURL)\(path)", queryParams: configuration.queryParams) })
@@ -47,6 +47,12 @@ public final class DeepSeekProvider: AIFileProvider, Sendable {
     }
 
     public func files() -> any AIFileClient { DeepSeekFileClient(config: config) }
+
+    public func responses(_ modelID: String) -> DeepSeekResponsesLanguageModel {
+        DeepSeekResponsesLanguageModel(modelID: modelID, config: config.withProviderID("deepseek.responses"))
+    }
+
+    public func responsesModel(_ modelID: String) -> DeepSeekResponsesLanguageModel { responses(modelID) }
 
     public func chatModel(_ modelID: String) throws -> any LanguageModel { try languageModel(modelID) }
 

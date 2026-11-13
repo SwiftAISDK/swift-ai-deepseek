@@ -11,13 +11,22 @@
       "tests": [
         "packages/deepseek/src/chat/convert-to-deepseek-chat-messages.test.ts",
         "packages/deepseek/src/chat/convert-to-deepseek-usage.test.ts",
+        "packages/deepseek/src/chat/deepseek-chat-language-model-options.test-d.ts",
         "packages/deepseek/src/chat/deepseek-chat-language-model.test.ts",
+        "packages/deepseek/src/chat/deepseek-file-part-options.test-d.ts",
         "packages/deepseek/src/chat/deepseek-internal-options.test.ts",
+        "packages/deepseek/src/chat/deepseek-lazy-schemas.test-d.ts",
         "packages/deepseek/src/chat/deepseek-lazy-schemas.test.ts",
+        "packages/deepseek/src/chat/deepseek-message-provider-options.test-d.ts",
         "packages/deepseek/src/chat/deepseek-prepare-tools.test.ts",
         "packages/deepseek/src/chat/deepseek-raw-usage.test.ts",
         "packages/deepseek/src/chat/is-deepseek-v4-model.test.ts",
-        "packages/deepseek/src/files/deepseek-files.test.ts"
+        "packages/deepseek/src/deepseek-language-model-options.test-d.ts",
+        "packages/deepseek/src/deepseek-provider.test-d.ts",
+        "packages/deepseek/src/files/deepseek-files-api.test-d.ts",
+        "packages/deepseek/src/files/deepseek-files.test.ts",
+        "packages/deepseek/src/responses/convert-to-deepseek-responses-input.test.ts",
+        "packages/deepseek/src/responses/deepseek-responses-language-model.test.ts"
       ]
     }
   ],
@@ -28,6 +37,9 @@
       "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekOptions.swift",
       "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekProvider.swift",
       "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekRequestPreparation.swift",
+      "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekResponsesModel.swift",
+      "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekResponsesRequest.swift",
+      "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekResponsesStreaming.swift",
       "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekToolsAndParsing.swift"
     ],
     "tests": [
@@ -37,7 +49,9 @@
       "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/TestSupport.swift",
       "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261101BehaviorTests.swift",
       "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261101CredentialsTests.swift",
-      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261108ToolTests.swift"
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261108ToolTests.swift",
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261114ResponsesRequestTests.swift",
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/Weekly20261114ResponsesResultTests.swift"
     ],
     "resources": []
   },
@@ -51,5 +65,5 @@
       "reason": "2026-11-01: integrity-verified @ai-sdk/deepseek 3.0.73 -> 3.0.77 source/declarations reviewed with exact matching-release tests 612be2311464804d1e4897afacbf8f3fc2f6d9e3 -> 9b603d36186b75e58d5479445a96c76f6e2d2700; focused Weekly20261101 assertions cover the published deltas and native credential settings. Existing coarse/imported mappings and earlier gaps remain unpromoted. Portable medium maps to low and xhigh maps to high against low/high/max, with matching generation/stream warnings; explicit provider effort retains existing canonical normalization/precedence. Explicit thinking settings no longer suppress independent portable effort mapping; provider-default leaves the field omitted, matching source request policy. Add lazy apiKeyProvider across language/files requests via shared credential-aware transport."
     }
   ],
-  "reviewNote": "2026-11-08: published @ai-sdk/deepseek 3.0.77..3.0.81 source, declarations and matching-release tests reviewed independently. Tool replay serialization and unknown strict-tool policy on Azure-hosted adapters. Delta review is not a claim of whole-provider parity; existing documented gaps remain."
+  "reviewNote": "2026-11-08: published @ai-sdk/deepseek 3.0.77..3.0.81 source, declarations and matching-release tests reviewed independently. Tool replay serialization and unknown strict-tool policy on Azure-hosted adapters. Delta review is not a claim of whole-provider parity; existing documented gaps remain. 2026-11-14: reviewed @ai-sdk/deepseek 3.0.81 -> 3.0.86 published archives/declarations and exact matching-release tests (0f3a85f92d1ce06ccde01d662407ef83e097a712 -> 8bc7652cdb13fc84722666eb93f45acd0d131eee). Package-specific changes, translated tests, known gaps and compatibility decisions are recorded in Docs/WeeklyUpstreamAudit20261114.json; package README describes consumer behavior. This delta review does not claim whole-package or live-service parity."
 }
