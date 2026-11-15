@@ -3,19 +3,19 @@
   "packages": [
     {
       "name": "@ai-sdk/deepseek",
-      "reviewedVersion": "3.0.86",
+      "reviewedVersion": "3.0.87",
       "ledgerKind": "provider",
-      "evidence": "`AIProviders.deepSeek`, `DeepSeekLanguageModel`, `DeepSeekFileClient`, `DeepSeekProviderTests.swift`, `DeepSeekVisionAndFilesUpstreamParityTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json; 2026-11-08 delta: Docs/WeeklyUpstreamAudit20261108.json; 2026-11-14 delta: Docs/WeeklyUpstreamAudit20261114.json",
+      "evidence": "`AIProviders.deepSeek`, `DeepSeekLanguageModel`, `DeepSeekFileClient`, `DeepSeekProviderTests.swift`, `DeepSeekVisionAndFilesUpstreamParityTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json; 2026-11-08 delta: Docs/WeeklyUpstreamAudit20261108.json; 2026-11-14 delta: Docs/WeeklyUpstreamAudit20261114.json; 2026-11-15 delta: Docs/WeeklyUpstreamAudit20261115.json",
       "reviewStatus": "imported-reviewed-with-gaps",
-      "archiveIntegrity": "sha512-QtkTSY1ugev+ZP8uFwqD2334w+FfdheWcr7qxZ/jI50gQbLCc4tE0KSD+d8WxPdqzBnqNBkTcFqVaiOJAB7orQ==",
-      "sourceRef": "npm:@ai-sdk/deepseek@3.0.86",
-      "testRef": "8bc7652cdb13fc84722666eb93f45acd0d131eee",
+      "archiveIntegrity": "sha512-byIeauKjVE/G6FbMd5LnWk/NKr7RnD3rTL81OSrXBv4Fykijyn63JNeB8y+exxjYHPlWJedkR4FLLel5AYpFgw==",
+      "sourceRef": "npm:@ai-sdk/deepseek@3.0.87",
+      "testRef": "0e8e0543aeda7d4dd4ce6eade0d5b7d5a43644c1",
       "testRefRelationship": "matching-release",
       "contractFamilies": [
         "LanguageModelV4",
         "ProviderV4"
       ],
-      "contractReview": "2026-11-14: verified published source/declarations and exact matching-release changed tests reviewed separately; native ports, per-file dispositions and retained gaps are recorded in Docs/WeeklyUpstreamAudit20261114.json. Delta review is not full-package or live-service parity."
+      "contractReview": "2026-11-15: published source/declarations and exact matching-release tests reviewed separately. Native delta scenarios, per-file dispositions, unchanged-catalog evidence and explicit remaining gaps are recorded in Docs/WeeklyUpstreamAudit20261115.json. Required checks remain a separate gate; no full-package/live-service parity claim."
     }
   ]
 }

@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "package": "swift-ai-deepseek",
-  "version": "1.2.0",
-  "releaseID": "weekly-upstream-20261114",
+  "version": "1.2.1",
+  "releaseID": "weekly-upstream-20261115",
   "source": {
-    "commit": "07fbf86b82d83d9724bd03622e9e87e74395286f",
-    "baseCommit": "07fbf86b82d83d9724bd03622e9e87e74395286f",
+    "commit": "1e543b35e0259a5bda888665dacf2d4a7f1bb0ed",
+    "baseCommit": "1e543b35e0259a5bda888665dacf2d4a7f1bb0ed",
     "workingTree": false,
-    "inputsSHA256": "63e472c0fe891cb7636d225e1c6467e4761dc3721be68081f2afa9f0b656bb29"
+    "inputsSHA256": "5508ffc6347bffaed13fb29409eb856df9a7796d3ebdcb6f623d1e8871b52999"
   },
   "dependencies": [
     {
@@ -17,28 +17,28 @@
   ],
   "changes": [
     {
-      "id": "weekly-upstream-20261114",
-      "notes": "Add explicit Responses factories, typed options and web search without changing existing Chat Completions defaults. Preserve ordered reasoning/tool replay, structured output, image restrictions, usage, web-search action metadata and distinct failed/incomplete/interrupted stream outcomes. Reviewed npm delta: @ai-sdk/deepseek 3.0.81 to 3.0.86. Validation: `node Scripts/test-packages.mjs` passed all 52 owning suites and 1731 facade tests; tooling 27/27, generation/isolation checks, standalone exports and 106 minimum/latest consumers, documentation check and 101-page build passed. Publication requires green exact-source Swift 6.3.3 CI. Paid/live verification and full-package parity are not claimed.",
-      "compatibility": "Additive native APIs or capabilities under the project minor-release convention. npm baselines and Swift SemVer are independent; this reviewed delta does not establish full-package or live-service parity. Required direct minimum: swift-ai-core 1.2.0 to 1.3.0 for request URL metadata."
+      "id": "weekly-upstream-20261115",
+      "notes": "Align the versioned request identity with the reviewed published package while retaining native open String model IDs and existing request, response, option, error, stream and telemetry behavior. Derived TypeScript model-ID/catalog reorganizations preserve the existing native runtime policies. Reviewed npm delta: @ai-sdk/deepseek 3.0.86 to 3.0.87. Validation passed: node Scripts/test-packages.mjs (55 owning packages, 2451 owning tests and 1736 compatibility tests), generation checks, 27 tooling tests, isolation/version checks, deterministic exports and minimum-dependency consumers. Documentation check/build passed (104 pages). Publication is gated by exact-source Swift 6.3.3 CI; subsequent public refs and clients are recorded in Docs/ReleaseVerification20261115.json. Paid/live-service checks were not run; this delta does not claim full-package parity.",
+      "compatibility": "Compatible versioned request identity correction; existing public selectors and dependency minimums remain. npm baselines and Swift SemVer are independent."
     }
   ],
   "canonicalDirectory": "Packages/swift-ai-deepseek",
   "upstream": [
     {
       "name": "@ai-sdk/deepseek",
-      "reviewedVersion": "3.0.86",
+      "reviewedVersion": "3.0.87",
       "ledgerKind": "provider",
-      "evidence": "`AIProviders.deepSeek`, `DeepSeekLanguageModel`, `DeepSeekFileClient`, `DeepSeekProviderTests.swift`, `DeepSeekVisionAndFilesUpstreamParityTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json; 2026-11-08 delta: Docs/WeeklyUpstreamAudit20261108.json; 2026-11-14 delta: Docs/WeeklyUpstreamAudit20261114.json",
+      "evidence": "`AIProviders.deepSeek`, `DeepSeekLanguageModel`, `DeepSeekFileClient`, `DeepSeekProviderTests.swift`, `DeepSeekVisionAndFilesUpstreamParityTests.swift`; 2026-11-01 delta: Docs/WeeklyUpstreamAudit20261101.json; 2026-11-08 delta: Docs/WeeklyUpstreamAudit20261108.json; 2026-11-14 delta: Docs/WeeklyUpstreamAudit20261114.json; 2026-11-15 delta: Docs/WeeklyUpstreamAudit20261115.json",
       "reviewStatus": "imported-reviewed-with-gaps",
-      "archiveIntegrity": "sha512-QtkTSY1ugev+ZP8uFwqD2334w+FfdheWcr7qxZ/jI50gQbLCc4tE0KSD+d8WxPdqzBnqNBkTcFqVaiOJAB7orQ==",
-      "sourceRef": "npm:@ai-sdk/deepseek@3.0.86",
-      "testRef": "8bc7652cdb13fc84722666eb93f45acd0d131eee",
+      "archiveIntegrity": "sha512-byIeauKjVE/G6FbMd5LnWk/NKr7RnD3rTL81OSrXBv4Fykijyn63JNeB8y+exxjYHPlWJedkR4FLLel5AYpFgw==",
+      "sourceRef": "npm:@ai-sdk/deepseek@3.0.87",
+      "testRef": "0e8e0543aeda7d4dd4ce6eade0d5b7d5a43644c1",
       "testRefRelationship": "matching-release",
       "contractFamilies": [
         "LanguageModelV4",
         "ProviderV4"
       ],
-      "contractReview": "2026-11-14: verified published source/declarations and exact matching-release changed tests reviewed separately; native ports, per-file dispositions and retained gaps are recorded in Docs/WeeklyUpstreamAudit20261114.json. Delta review is not full-package or live-service parity."
+      "contractReview": "2026-11-15: published source/declarations and exact matching-release tests reviewed separately. Native delta scenarios, per-file dispositions, unchanged-catalog evidence and explicit remaining gaps are recorded in Docs/WeeklyUpstreamAudit20261115.json. Required checks remain a separate gate; no full-package/live-service parity claim."
     }
   ],
   "note": "Independent port. Imported test refs and contract review gaps retain their original status; export is not new upstream parity proof.",
@@ -57,7 +57,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Porting/map.json",
-      "sha256": "b6878c6af8766c7e2f5771aa976f5dd048d956229b6cca9283b013ba1f41b038"
+      "sha256": "7f6f97a0b4b3ad06b5a6c6218ab299f16110ae6a50a6650968fae18f84136ae2"
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/README.md",
@@ -77,7 +77,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekProvider.swift",
-      "sha256": "b1a604b6490c06e2a6ef4ff78648e6fb2aba9c2947d081f65af130dd2168ab62"
+      "sha256": "52e1415cf5d5c9adb8b743459565abfd556f5f8bd6ef716e0ae284031f973b45"
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekRequestPreparation.swift",
@@ -101,7 +101,7 @@
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekProviderTests.swift",
-      "sha256": "a4295237eb4655b62500709a2e20a14541f666e619e587c3447451edd7b60926"
+      "sha256": "70f982585d20fe92a85f5f44732696a851c47d137b8aad8de780007a72c65f5e"
     },
     {
       "canonicalPath": "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekVisionAndFilesUpstreamParityTests.swift",
