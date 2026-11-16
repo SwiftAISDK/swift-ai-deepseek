@@ -194,7 +194,7 @@ import Testing
     }
     await #expect(throws: AIError.invalidArgument(
         argument: "data",
-        message: "DeepSeek file uploads must not exceed 64 MiB (67108864 bytes). Received 67108865 bytes."
+        message: "DeepSeek file uploads must not exceed 64 MiB (67,108,864 bytes). Received 67,108,865 bytes."
     )) {
         _ = try await files.uploadFile(FileUploadRequest(
             data: Data(count: 64 * 1_024 * 1_024 + 1),

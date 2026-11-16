@@ -92,6 +92,10 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
         self.config = config
     }
 
+    private var providerOptionsName: String {
+        providerID.split(separator: ".").first.map { $0.trimmingCharacters(in: .whitespaces) } ?? "deepseek"
+    }
+
     public func generate(_ request: LanguageModelRequest) async throws -> TextGenerationResult {
         let prepared = try deepSeekPreparedCall(
             for: request,
@@ -102,7 +106,7 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
             supportsAssistantPrefixCompletion: config.baseURL.hasSuffix("/beta"),
             supportsStrictToolCalls: providerID.hasPrefix("azure.") ? nil : config.baseURL.hasSuffix("/beta"),
             supportsPenaltySampling: providerID.hasPrefix("azure."),
-            providerOptionsName: providerID.split(separator: ".").first.map(String.init) ?? "deepseek"
+            providerOptionsName: providerOptionsName
         )
         let response = try await config.sendJSONResponse(
             path: "/chat/completions",
@@ -115,19 +119,27 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
         guard let choices = raw["choices"]?.arrayValue, !choices.isEmpty else {
             throw AIError.invalidResponse(provider: providerID, message: "Response did not contain any choices.")
         }
+        guard deepSeekUsageIsValid(raw) else {
+            throw AIError.invalidResponse(provider: providerID, message: "Invalid DeepSeek usage in response.")
+        }
         let choice: JSONValue? = choices[0]
         let reasoning = choice?["message"]?["reasoning_content"]?.stringValue ?? ""
         let toolCalls = deepSeekToolCalls(from: choice?["message"]?["tool_calls"])
-        guard let text = choice?["message"]?["content"]?.stringValue ?? (toolCalls.isEmpty ? nil : "") else {
-            throw AIError.invalidResponse(provider: providerID, message: "No text content found in DeepSeek response.")
-        }
+        let text = choice?["message"]?["content"]?.stringValue ?? ""
+        // Upstream content order: reasoning, tool calls, then text. A response
+        // without text content yields no text part instead of an error.
+        var content: [AIResultContentPart] = []
+        if !reasoning.isEmpty { content.append(.reasoning(reasoning)) }
+        content += toolCalls.map(AIResultContentPart.toolCall)
+        if !text.isEmpty { content.append(.text(text)) }
         return TextGenerationResult(
             text: text,
+            content: content,
             reasoning: reasoning,
             finishReason: deepSeekFinishReason(choice?["finish_reason"]?.stringValue),
             usage: deepSeekUsage(from: raw),
             toolCalls: toolCalls,
-            providerMetadata: deepSeekProviderMetadata(from: raw),
+            providerMetadata: deepSeekProviderMetadata(from: raw, providerOptionsName: providerOptionsName),
             rawValue: raw,
             warnings: prepared.warnings,
             responseMetadata: aiResponseMetadata(from: raw, response: response.response, modelID: modelID)
@@ -147,7 +159,7 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
                         supportsAssistantPrefixCompletion: config.baseURL.hasSuffix("/beta"),
                         supportsStrictToolCalls: providerID.hasPrefix("azure.") ? nil : config.baseURL.hasSuffix("/beta"),
                         supportsPenaltySampling: providerID.hasPrefix("azure."),
-                        providerOptionsName: providerID.split(separator: ".").first.map(String.init) ?? "deepseek"
+                        providerOptionsName: providerOptionsName
                     )
                     let httpRequest = try config.request(
                         path: "/chat/completions",
@@ -168,7 +180,7 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
                     continuation.yield(.streamStart(warnings: prepared.warnings))
                     var latestUsage: TokenUsage? = TokenUsage()
                     var finishReason: String? = "interrupted"
-                    var providerMetadata: [String: JSONValue] = [:]
+                    var streamMetadata = DeepSeekStreamMetadata()
                     var toolCalls = DeepSeekStreamingToolCalls()
                     var didEmitResponseMetadata = false
                     var activeReasoningID: String?
@@ -186,6 +198,11 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
                         if request.includeRawChunks {
                             continuation.yield(.raw(raw))
                         }
+                        if raw["error"] == nil, !deepSeekUsageIsValid(raw) {
+                            finishReason = "error"
+                            continuation.yield(.error(message: "Invalid DeepSeek usage in stream chunk.", rawValue: raw))
+                            continue
+                        }
                         if let providerError = deepSeekStreamProviderError(from: raw) {
                             finishReason = "error"
                             continuation.yield(.providerError(providerError))
@@ -195,8 +212,10 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
                             didEmitResponseMetadata = true
                             continuation.yield(.responseMetadata(aiResponseMetadata(from: raw, response: responseHead, modelID: modelID)))
                         }
-                        latestUsage = deepSeekUsage(from: raw) ?? latestUsage
-                        deepSeekMergeProviderMetadata(deepSeekProviderMetadata(from: raw), into: &providerMetadata)
+                        if let usage = raw["usage"], usage != .null {
+                            latestUsage = deepSeekUsage(from: raw)
+                        }
+                        streamMetadata.apply(raw)
                         if let reasoning = raw["choices"]?[0]?["delta"]?["reasoning_content"]?.stringValue, !reasoning.isEmpty {
                             let id = activeReasoningID ?? "reasoning-0"
                             if activeReasoningID == nil {
@@ -253,7 +272,7 @@ public final class DeepSeekLanguageModel: LanguageModel, @unchecked Sendable {
                     continuation.yield(.finishMetadata(
                         reason: finishReason,
                         usage: latestUsage,
-                        providerMetadata: providerMetadata
+                        providerMetadata: streamMetadata.providerMetadata(providerOptionsName: providerOptionsName)
                     ))
                     continuation.finish()
                 } catch {

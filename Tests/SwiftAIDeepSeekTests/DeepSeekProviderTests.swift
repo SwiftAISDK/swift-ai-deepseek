@@ -59,7 +59,7 @@ import SwiftAI
     #expect(streamStartWarnings == [AIWarning(
         type: "compatibility",
         feature: "reasoningEffort",
-        message: "reasoningEffort xhigh is not a canonical DeepSeek value and was mapped to max."
+        message: #"reasoningEffort "xhigh" is not a canonical DeepSeek value. mapped to "max"."#
     )])
     #expect(responseMetadata?.id == "ds-1")
     #expect(responseMetadata?.modelID == "deepseek-reasoner")
@@ -503,8 +503,8 @@ import SwiftAI
     #expect(result.warnings == [
         AIWarning(type: "unsupported", feature: "topK"),
         AIWarning(type: "unsupported", feature: "seed"),
-        AIWarning(type: "deprecated", feature: "frequencyPenalty", message: "frequencyPenalty is deprecated by DeepSeek and has been omitted."),
-        AIWarning(type: "deprecated", feature: "presencePenalty", message: "presencePenalty is deprecated by DeepSeek and has been omitted.")
+        AIWarning(type: "deprecated", setting: "frequencyPenalty", message: "frequencyPenalty is deprecated by DeepSeek and has been omitted. Remove frequencyPenalty from the request."),
+        AIWarning(type: "deprecated", setting: "presencePenalty", message: "presencePenalty is deprecated by DeepSeek and has been omitted. Remove presencePenalty from the request.")
     ])
     let body = try decodeJSONBody(try #require((await transport.requests()).first?.body))
     #expect(body["messages"]?[0]?["role"]?.stringValue == "system")

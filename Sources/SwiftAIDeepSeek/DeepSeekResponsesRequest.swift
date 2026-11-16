@@ -44,12 +44,6 @@ func deepSeekResponsesPrepared(_ request: LanguageModelRequest, modelID: String,
     body["max_output_tokens"] = request.maxOutputTokens.map(JSONValue.init)
     body["temperature"] = request.temperature.map(JSONValue.number); body["top_p"] = request.topP.map(JSONValue.number)
     body["top_logprobs"] = options["topLogprobs"]; body["user"] = options["userId"]
-    let effort: String?
-    if options["thinking"]?["type"] == "disabled" { effort = "none" }
-    else if let explicit = options["reasoningEffort"]?.stringValue { effort = explicit }
-    else if request.reasoning == "none" { effort = "none" }
-    else { effort = mapReasoningToProviderEffort(reasoning: request.reasoning, effortMap: ["minimal": "low", "low": "low", "medium": "high", "high": "high", "xhigh": "max", "max": "max"], warnings: &warnings) }
-    if let effort { body["reasoning"] = ["effort": .string(effort)] }
     if case let .json(schema, name, _) = request.responseFormat {
         let value: JSONValue = schema.map { ["type": "json_schema", "name": .string(name ?? "response"), "schema": $0] } ?? ["type": "json_object"]
         body["text"] = ["format": value]
@@ -62,9 +56,9 @@ func deepSeekResponsesPrepared(_ request: LanguageModelRequest, modelID: String,
         } else {
             let function = tool["function"] ?? tool
             if function["strict"] != nil || tool["strict"] != nil { warnings.append(.init(type: "unsupported", feature: "strict tool calls", message: "The DeepSeek Responses API does not support strict mode.")) }
-            var parameters = function.objectValue ?? [:]
-            parameters.removeValue(forKey: "strict")
-            tools.append(.object(["type": "function", "name": .string(toolName), "description": function["description"], "parameters": .object(parameters)]))
+            // Upstream `deepseek-responses-prepare-tools` sends only `tool.inputSchema`.
+            let parameters = aiFunctionToolInputSchema(function.objectValue.map(JSONValue.object) ?? .object([:]))
+            tools.append(.object(["type": "function", "name": .string(toolName), "description": function["description"], "parameters": parameters]))
         }
     }
     if !request.tools.isEmpty {
@@ -78,6 +72,14 @@ func deepSeekResponsesPrepared(_ request: LanguageModelRequest, modelID: String,
             } else { body["tool_choice"] = choice.stringValue.map(JSONValue.string) ?? choice["type"] }
         }
     }
+    // Upstream maps portable reasoning after tool preparation, so its
+    // compatibility warnings follow tool warnings.
+    let effort: String?
+    if options["thinking"]?["type"] == "disabled" { effort = "none" }
+    else if let explicit = options["reasoningEffort"]?.stringValue { effort = explicit }
+    else if request.reasoning == "none" { effort = "none" }
+    else { effort = mapReasoningToProviderEffort(reasoning: request.reasoning, effortMap: ["minimal": "low", "low": "low", "medium": "high", "high": "high", "xhigh": "max", "max": "max"], warnings: &warnings) }
+    if let effort { body["reasoning"] = ["effort": .string(effort)] }
     body.merge(request.extraBody) { _, explicit in explicit }
     return .init(body: body, warnings: warnings, webSearchName: webSearchName)
 }
@@ -142,10 +144,12 @@ func deepSeekResponsesImage(_ part: AIContentPart, providerOptionsName: String =
     }
     let value = part.providerMetadata[providerOptionsName]
     if let value, value != .null, value.objectValue == nil { throw deepSeekResponsesArgument("image", "Image options must be an object.") }
-    if value?["fileData"] == true { throw deepSeekResponsesArgument("fileData", "DeepSeek fileData image parts with the Responses API are unsupported.") }
-    if let fileData = value?["fileData"], fileData.boolValue == nil { throw deepSeekResponsesArgument("fileData", "Expected a boolean.") }
+    // Validate like upstream's file-part schema (`fileData` is `literal(true)`)
+    // before rejecting `fileData`, which the Responses API does not support.
+    if let fileData = value?["fileData"], fileData != true { throw deepSeekResponsesArgument("fileData", "DeepSeek fileData must be true when provided.") }
     let detail = value?["imageDetail"]
     if let detail, !["low", "high", "original", "auto"].contains(detail.stringValue) { throw deepSeekResponsesArgument("imageDetail", "Unsupported image detail.") }
+    if value?["fileData"] == true { throw deepSeekResponsesArgument("fileData", "DeepSeek fileData image parts with the Responses API are unsupported.") }
     let imageURL: String
     if let url {
         guard url.utf16.count <= 8_192 else { throw deepSeekResponsesArgument("messages", "DeepSeek image URLs must not exceed 8192 characters.") }; imageURL = url

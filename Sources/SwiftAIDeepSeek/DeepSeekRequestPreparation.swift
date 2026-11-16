@@ -15,7 +15,7 @@ func deepSeekPreparedCall(
     supportsPenaltySampling: Bool = false,
     providerOptionsName: String = "deepseek"
 ) throws -> DeepSeekPreparedCall {
-    var options = try deepSeekOptions(from: request)
+    var options = try deepSeekOptions(from: request, providerOptionsName: providerOptionsName)
     let responseFormat = deepSeekResolvedResponseFormat(request: request, options: &options)
     let optionToolChoice = options.removeValue(forKey: "toolChoice")
     let strictJsonSchema = options.removeValue(forKey: "strictJsonSchema")
@@ -50,24 +50,10 @@ func deepSeekPreparedCall(
         }
     }
     body.merge(options) { _, new in new }
-    var optionCompatibilityWarnings: [AIWarning] = []
-    if body["thinking"]?["type"]?.stringValue == "adaptive" {
-        body["thinking"] = .object(["type": .string("enabled")])
-        optionCompatibilityWarnings.append(AIWarning(
-            type: "compatibility",
-            feature: "thinking.type",
-            message: "thinking.type adaptive is not a canonical DeepSeek value and was mapped to enabled."
-        ))
-    }
-    if let effort = body["reasoning_effort"]?.stringValue,
-       effort == "medium" || effort == "xhigh" {
-        let mapped = effort == "medium" ? "high" : "max"
-        body["reasoning_effort"] = .string(mapped)
-        optionCompatibilityWarnings.append(AIWarning(
-            type: "compatibility",
-            feature: "reasoningEffort",
-            message: "reasoningEffort \(effort) is not a canonical DeepSeek value and was mapped to \(mapped)."
-        ))
+
+    // Upstream only sends `logprobs: true`; an explicit false is omitted.
+    if body["logprobs"]?.boolValue == false {
+        body.removeValue(forKey: "logprobs")
     }
     if let topLogprobs = body.removeValue(forKey: "topLogprobs") {
         body["top_logprobs"] = topLogprobs
@@ -76,10 +62,26 @@ func deepSeekPreparedCall(
     if let userID = body.removeValue(forKey: "userId") {
         body["user_id"] = userID
     }
-    let reasoningWarnings = supportsThinking ? deepSeekApplyReasoning(request.reasoning, to: &body) : []
-    if !supportsThinking {
+
+    // A thinking object without a type does not select a thinking mode.
+    if let thinking = body["thinking"], thinking["type"] == nil || thinking["type"] == .null {
         body.removeValue(forKey: "thinking")
     }
+    var thinkingWarnings: [AIWarning] = []
+    if body["thinking"]?["type"]?.stringValue == "adaptive" {
+        body["thinking"] = .object(["type": .string("enabled")])
+        thinkingWarnings.append(AIWarning(
+            type: "compatibility",
+            feature: "thinking.type",
+            message: #"thinking.type "adaptive" is not a canonical DeepSeek value. mapped to "enabled"."#
+        ))
+    }
+    if !supportsThinking {
+        body.removeValue(forKey: "thinking")
+    } else if body["thinking"] == nil, let reasoning = request.reasoning, isCustomReasoning(reasoning) {
+        body["thinking"] = ["type": .string(reasoning == "none" ? "disabled" : "enabled")]
+    }
+
     if let responseFormat, responseFormat["type"]?.stringValue == "json" {
         if supportsStructuredOutputs, let schema = responseFormat["schema"] {
             var jsonSchema: [String: JSONValue] = [
@@ -99,37 +101,93 @@ func deepSeekPreparedCall(
         }
     }
 
-    if body["thinking"]?["type"]?.stringValue == "disabled" {
-        body.removeValue(forKey: "reasoning_effort")
+    var callWarnings: [AIWarning] = []
+    if request.topK != nil {
+        callWarnings.append(AIWarning(type: "unsupported", feature: "topK"))
     }
-    var samplingWarnings: [AIWarning] = []
+    if request.seed != nil {
+        callWarnings.append(AIWarning(type: "unsupported", feature: "seed"))
+    }
     if !supportsPenaltySampling, request.frequencyPenalty != nil {
-        samplingWarnings.append(AIWarning(type: "deprecated", feature: "frequencyPenalty", message: "frequencyPenalty is deprecated by DeepSeek and has been omitted."))
+        callWarnings.append(AIWarning(
+            type: "deprecated",
+            setting: "frequencyPenalty",
+            message: "frequencyPenalty is deprecated by DeepSeek and has been omitted. Remove frequencyPenalty from the request."
+        ))
     }
     if !supportsPenaltySampling, request.presencePenalty != nil {
-        samplingWarnings.append(AIWarning(type: "deprecated", feature: "presencePenalty", message: "presencePenalty is deprecated by DeepSeek and has been omitted."))
+        callWarnings.append(AIWarning(
+            type: "deprecated",
+            setting: "presencePenalty",
+            message: "presencePenalty is deprecated by DeepSeek and has been omitted. Remove presencePenalty from the request."
+        ))
     }
+    callWarnings += thinkingWarnings
+
     let thinkingEnabled = supportsThinking
         && body["thinking"]?["type"]?.stringValue != "disabled"
         && (body["thinking"] != nil || modelID == "deepseek-reasoner" || deepSeekIsV4Model(modelID))
     if thinkingEnabled {
-        if body.removeValue(forKey: "temperature") != nil {
-            samplingWarnings.append(AIWarning(type: "unsupported", feature: "temperature", message: "temperature has no effect when DeepSeek thinking is enabled."))
+        body.removeValue(forKey: "temperature")
+        body.removeValue(forKey: "top_p")
+        if request.temperature != nil {
+            callWarnings.append(AIWarning(
+                type: "unsupported",
+                feature: "temperature",
+                message: "temperature has no effect when DeepSeek thinking is enabled. Set providerOptions.deepseek.thinking.type to 'disabled' to use temperature."
+            ))
         }
-        if body.removeValue(forKey: "top_p") != nil {
-            samplingWarnings.append(AIWarning(type: "unsupported", feature: "topP", message: "topP has no effect when DeepSeek thinking is enabled."))
+        if request.topP != nil {
+            callWarnings.append(AIWarning(
+                type: "unsupported",
+                feature: "topP",
+                message: "topP has no effect when DeepSeek thinking is enabled. Set providerOptions.deepseek.thinking.type to 'disabled' to use topP."
+            ))
         }
     }
+
+    // Provider effort wins over portable reasoning; both are independent of
+    // whether the endpoint accepts the `thinking` field (Azure does not).
+    if let effort = body["reasoning_effort"]?.stringValue {
+        let mapped = deepSeekCanonicalReasoningEffort(effort)
+        if mapped != effort {
+            body["reasoning_effort"] = .string(mapped)
+            callWarnings.append(AIWarning(
+                type: "compatibility",
+                feature: "reasoningEffort",
+                message: #"reasoningEffort "\#(effort)" is not a canonical DeepSeek value. mapped to "\#(mapped)"."#
+            ))
+        }
+    } else if body["reasoning_effort"] == nil,
+              let reasoning = request.reasoning, isCustomReasoning(reasoning), reasoning != "none",
+              let effort = mapReasoningToProviderEffort(
+                  reasoning: reasoning,
+                  effortMap: ["low": "low", "high": "high", "max": "max"],
+                  warnings: &callWarnings
+              ) {
+        body["reasoning_effort"] = .string(effort)
+    }
+    if body["thinking"]?["type"]?.stringValue == "disabled" {
+        body.removeValue(forKey: "reasoning_effort")
+    }
+
     return DeepSeekPreparedCall(
         body: body,
         warnings: preparedMessages.warnings
-            + deepSeekWarnings(request: request, responseFormat: responseFormat, supportsStructuredOutputs: supportsStructuredOutputs)
-            + reasoningWarnings
-            + optionCompatibilityWarnings
+            + callWarnings
             + preparedTools.warnings
-            + samplingWarnings
             + (request.tools.isEmpty ? [] : deepSeekToolChoiceWarnings(from: toolChoice))
     )
+}
+
+/// Upstream accepts `medium` and `xhigh` for backwards compatibility and maps
+/// them to the canonical DeepSeek values `high` and `max`.
+func deepSeekCanonicalReasoningEffort(_ effort: String) -> String {
+    switch effort {
+    case "medium": return "high"
+    case "xhigh": return "max"
+    default: return effort
+    }
 }
 
 func deepSeekMessages(
@@ -152,6 +210,11 @@ func deepSeekMessages(
                 "role": .string("system"),
                 "content": .string("Return JSON that conforms to the following schema: \(schemaText)")
             ]))
+            warnings.append(AIWarning(
+                type: "compatibility",
+                feature: "responseFormat JSON schema",
+                message: "JSON response schema is injected into the system message."
+            ))
         } else if responseFormat?["schema"] == nil {
             output.append(.object([
                 "role": .string("system"),

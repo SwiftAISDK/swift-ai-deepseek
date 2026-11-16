@@ -32,20 +32,17 @@ func deepSeekTools(from tools: [String: JSONValue], supportsStrictToolCalls: Boo
             ))
             return nil
         }
-        var parameters = schema
+        // Upstream `deepseek-prepare-tools` sends `tool.inputSchema` as
+        // `parameters`; description and strict stay at the function level.
         var function: [String: JSONValue] = [
             "name": .string(name),
-            "parameters": parameters
+            "parameters": aiFunctionToolInputSchema(schema)
         ]
-        if var parameterObject = parameters.objectValue {
-            if let description = parameterObject["description"]?.stringValue {
-                function["description"] = .string(description)
-            }
-            if let strict = parameterObject.removeValue(forKey: "strict") {
-                function["strict"] = strict
-                parameters = .object(parameterObject)
-                function["parameters"] = parameters
-            }
+        if let description = aiFunctionToolDescription(schema) {
+            function["description"] = .string(description)
+        }
+        if let strict = object?["strict"], strict != .null {
+            function["strict"] = strict
         }
         return .object([
             "type": .string("function"),
@@ -113,7 +110,7 @@ func deepSeekJSONString(_ value: JSONValue) -> String? {
 }
 
 func deepSeekUsage(from raw: JSONValue) -> TokenUsage? {
-    guard let usage = raw["usage"] else { return TokenUsage() }
+    guard let usage = raw["usage"], usage != .null else { return TokenUsage() }
     let inputTokens = usage["prompt_tokens"]?.intValue ?? usage["input_tokens"]?.intValue ?? 0
     let outputTokens = usage["completion_tokens"]?.intValue ?? usage["output_tokens"]?.intValue ?? 0
     let cacheReadTokens = usage["prompt_cache_hit_tokens"]?.intValue
@@ -131,6 +128,27 @@ func deepSeekUsage(from raw: JSONValue) -> TokenUsage? {
         outputReasoningTokens: reasoningTokens,
         rawValue: usage
     )
+}
+
+/// Mirrors upstream's loose usage schema: known token fields must be numbers
+/// (or null) and the detail containers objects; unknown fields pass through.
+func deepSeekUsageIsValid(_ raw: JSONValue) -> Bool {
+    guard let usage = raw["usage"], usage != .null else { return true }
+    guard usage.objectValue != nil else { return false }
+    func isNumberOrNull(_ value: JSONValue?) -> Bool {
+        guard let value, value != .null else { return true }
+        if case .number = value { return true }
+        return false
+    }
+    for key in ["prompt_tokens", "completion_tokens", "prompt_cache_hit_tokens", "prompt_cache_miss_tokens", "total_tokens"]
+        where !isNumberOrNull(usage[key]) {
+        return false
+    }
+    for (container, key) in [("prompt_tokens_details", "cached_tokens"), ("completion_tokens_details", "reasoning_tokens")] {
+        guard let details = usage[container], details != .null else { continue }
+        guard details.objectValue != nil, isNumberOrNull(details[key]) else { return false }
+    }
+    return true
 }
 
 func deepSeekToolResultContent(_ result: AIToolResult) -> String {
@@ -184,7 +202,7 @@ func deepSeekFinishReason(_ reason: String?) -> String? {
     }
 }
 
-func deepSeekProviderMetadata(from raw: JSONValue) -> [String: JSONValue] {
+func deepSeekProviderMetadata(from raw: JSONValue, providerOptionsName: String = "deepseek") -> [String: JSONValue] {
     var metadata: [String: JSONValue] = [:]
     if let hit = raw["usage"]?["prompt_cache_hit_tokens"] {
         metadata["promptCacheHitTokens"] = hit
@@ -195,35 +213,71 @@ func deepSeekProviderMetadata(from raw: JSONValue) -> [String: JSONValue] {
     if let object = raw["object"], object != .null { metadata["responseObject"] = object }
     if let choice = raw["choices"]?[0] {
         if let index = choice["index"], index != .null { metadata["choiceIndex"] = index }
-        if let role = choice["message"]?["role"] ?? choice["delta"]?["role"], role != .null { metadata["messageRole"] = role }
-        if let logprobs = choice["logprobs"], logprobs != .null { metadata["logprobs"] = logprobs }
+        if let role = choice["message"]?["role"], role != .null { metadata["messageRole"] = role }
         if let calls = choice["message"]?["tool_calls"]?.arrayValue {
-            metadata["toolCallTypes"] = .array(calls.compactMap { $0["type"] })
+            metadata["toolCallTypes"] = .array(calls.compactMap { call in
+                guard let type = call["type"], type != .null else { return nil }
+                return type
+            })
         }
+        if let logprobs = choice["logprobs"], logprobs != .null { metadata["logprobs"] = logprobs }
     }
     if let fingerprint = raw["system_fingerprint"], fingerprint != .null { metadata["systemFingerprint"] = fingerprint }
-    guard !metadata.isEmpty else { return [:] }
-    return ["deepseek": .object(metadata)]
+    // Upstream always returns the provider namespace, even when it is empty.
+    return [providerOptionsName: .object(metadata)]
 }
 
-func deepSeekMergeProviderMetadata(_ source: [String: JSONValue], into target: inout [String: JSONValue]) {
-    for (key, value) in source {
-        if case let .object(existing) = target[key],
-           case var .object(incoming) = value {
-            if case let .object(existingLogprobs) = existing["logprobs"],
-               case let .object(incomingLogprobs) = incoming["logprobs"] {
-                var mergedLogprobs = existingLogprobs.merging(incomingLogprobs) { _, new in new }
-                for logprobKey in ["content", "reasoning_content"] {
-                    if case let .array(existingValues) = existingLogprobs[logprobKey],
-                       case let .array(incomingValues) = incomingLogprobs[logprobKey] {
-                        mergedLogprobs[logprobKey] = .array(existingValues + incomingValues)
-                    }
-                }
-                incoming["logprobs"] = .object(mergedLogprobs)
-            }
-            target[key] = .object(existing.merging(incoming) { _, new in new })
-        } else {
-            target[key] = value
+/// Accumulates streamed chunk metadata the way upstream's stream transform
+/// does: latest non-null scalar values, tool-call types ordered by index and
+/// concatenated content/reasoning logprobs.
+struct DeepSeekStreamMetadata {
+    private var promptCacheHitTokens: JSONValue?
+    private var promptCacheMissTokens: JSONValue?
+    private var responseObject: JSONValue?
+    private var choiceIndex: JSONValue?
+    private var messageRole: JSONValue?
+    private var systemFingerprint: JSONValue?
+    private var toolCallTypes: [Int: JSONValue] = [:]
+    private var contentLogprobs: [JSONValue] = []
+    private var reasoningLogprobs: [JSONValue] = []
+
+    mutating func apply(_ raw: JSONValue) {
+        if let usage = raw["usage"], usage != .null {
+            promptCacheHitTokens = usage["prompt_cache_hit_tokens"].flatMap { $0 == .null ? nil : $0 }
+            promptCacheMissTokens = usage["prompt_cache_miss_tokens"].flatMap { $0 == .null ? nil : $0 }
         }
+        if let object = raw["object"], object != .null { responseObject = object }
+        if let fingerprint = raw["system_fingerprint"], fingerprint != .null { systemFingerprint = fingerprint }
+        guard let choice = raw["choices"]?[0] else { return }
+        if let index = choice["index"], index != .null { choiceIndex = index }
+        if let content = choice["logprobs"]?["content"]?.arrayValue { contentLogprobs += content }
+        if let reasoning = choice["logprobs"]?["reasoning_content"]?.arrayValue { reasoningLogprobs += reasoning }
+        guard let delta = choice["delta"], delta != .null else { return }
+        if let role = delta["role"], role != .null { messageRole = role }
+        for call in delta["tool_calls"]?.arrayValue ?? [] {
+            if let index = call["index"]?.intValue, let type = call["type"], type != .null {
+                toolCallTypes[index] = type
+            }
+        }
+    }
+
+    func providerMetadata(providerOptionsName: String) -> [String: JSONValue] {
+        var metadata: [String: JSONValue] = [:]
+        metadata["promptCacheHitTokens"] = promptCacheHitTokens
+        metadata["promptCacheMissTokens"] = promptCacheMissTokens
+        metadata["responseObject"] = responseObject
+        metadata["choiceIndex"] = choiceIndex
+        metadata["messageRole"] = messageRole
+        if !toolCallTypes.isEmpty {
+            metadata["toolCallTypes"] = .array(toolCallTypes.sorted { $0.key < $1.key }.map(\.value))
+        }
+        if !contentLogprobs.isEmpty || !reasoningLogprobs.isEmpty {
+            var logprobs: [String: JSONValue] = [:]
+            if !contentLogprobs.isEmpty { logprobs["content"] = .array(contentLogprobs) }
+            if !reasoningLogprobs.isEmpty { logprobs["reasoning_content"] = .array(reasoningLogprobs) }
+            metadata["logprobs"] = .object(logprobs)
+        }
+        metadata["systemFingerprint"] = systemFingerprint
+        return [providerOptionsName: .object(metadata)]
     }
 }

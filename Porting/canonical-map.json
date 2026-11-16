@@ -43,6 +43,7 @@
       "Packages/swift-ai-deepseek/Sources/SwiftAIDeepSeek/DeepSeekToolsAndParsing.swift"
     ],
     "tests": [
+      "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekChatUpstreamParityTests.swift",
       "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekProviderTests.swift",
       "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/DeepSeekVisionAndFilesUpstreamParityTests.swift",
       "Packages/swift-ai-deepseek/Tests/SwiftAIDeepSeekTests/FixtureDownloadTransport.swift",

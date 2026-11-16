@@ -4,18 +4,23 @@ import SwiftAITransport
 import SwiftAIProviderUtilities
 
 
-func deepSeekOptions(from request: LanguageModelRequest) throws -> [String: JSONValue] {
+func deepSeekOptions(from request: LanguageModelRequest, providerOptionsName: String = "deepseek") throws -> [String: JSONValue] {
     var output = request.extraBody
     if let nested = output.removeValue(forKey: "deepseek")?.objectValue {
         output.merge(nested) { _, nested in nested }
     }
-    if let value = request.providerOptions["deepseek"] {
+    // Upstream parses the namespace named by the provider ID prefix (for
+    // example `azure` for Azure-hosted DeepSeek); `deepseek` stays a fallback.
+    let namespace = providerOptionsName != "deepseek" && request.providerOptions[providerOptionsName] != nil
+        ? providerOptionsName
+        : "deepseek"
+    if let value = request.providerOptions[namespace] {
         guard value != .null else {
             deepSeekMoveKey("reasoningEffort", to: "reasoning_effort", in: &output)
             return output
         }
         guard let nested = value.objectValue else {
-            throw AIError.invalidArgument(argument: "providerOptions.deepseek", message: "DeepSeek provider options must be an object.")
+            throw AIError.invalidArgument(argument: "providerOptions.\(namespace)", message: "DeepSeek provider options must be an object.")
         }
         for key in deepSeekProviderOptionKeys {
             output.removeValue(forKey: key)
@@ -115,26 +120,6 @@ func deepSeekResponseFormatJSON(_ responseFormat: AIResponseFormat) -> JSONValue
             "description": description.map(JSONValue.string)
         ])
     }
-}
-
-func deepSeekWarnings(request: LanguageModelRequest, responseFormat: JSONValue?, supportsStructuredOutputs: Bool = false) -> [AIWarning] {
-    var warnings: [AIWarning] = []
-    if request.topK != nil {
-        warnings.append(AIWarning(type: "unsupported", feature: "topK"))
-    }
-    if request.seed != nil {
-        warnings.append(AIWarning(type: "unsupported", feature: "seed"))
-    }
-    if !supportsStructuredOutputs,
-       responseFormat?["type"]?.stringValue == "json",
-       responseFormat?["schema"] != nil {
-        warnings.append(AIWarning(
-            type: "compatibility",
-            feature: "responseFormat JSON schema",
-            message: "JSON response schema is injected into the system message."
-        ))
-    }
-    return warnings
 }
 
 func deepSeekMoveKey(_ source: String, to destination: String, in values: inout [String: JSONValue]) {

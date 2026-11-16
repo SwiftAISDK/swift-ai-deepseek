@@ -75,4 +75,15 @@ struct Weekly20261114ResponsesRequestTests {
         #expect(throws: AIError.self) { try deepSeekResponsesImage(.imageURL(accepted + "a")) }
         #expect(throws: AIError.self) { try deepSeekResponsesImage(.data(mimeType: "image/png", data: Data([1]), providerMetadata: ["deepseek": ["fileData": true]])) }
     }
+
+    /// deepseek-responses-prepare-tools sends `tool.inputSchema` as `parameters`.
+    @Test func functionToolMetadataStaysOutOfParameters() throws {
+        let request = LanguageModelRequest(messages: [], tools: ["lookup": [
+            "type": "object", "properties": ["q": ["type": "string"]], "description": "Look up",
+            "providerOptions": ["deepseek": ["flag": true]], "inputExamples": [["input": ["q": "a"]]]
+        ]])
+        let prepared = try deepSeekResponsesPrepared(request, modelID: "deepseek-flash")
+        #expect(prepared.body["tools"] == [["type": "function", "name": "lookup", "description": "Look up",
+                                             "parameters": ["type": "object", "properties": ["q": ["type": "string"]]]]])
+    }
 }

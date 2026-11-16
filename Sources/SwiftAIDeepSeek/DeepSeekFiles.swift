@@ -111,7 +111,7 @@ private func deepSeekValidateFileUpload(_ request: FileUploadRequest) throws {
     guard request.data.count <= deepSeekMaximumFileSizeBytes else {
         throw AIError.invalidArgument(
             argument: "data",
-            message: "DeepSeek file uploads must not exceed 64 MiB (\(deepSeekMaximumFileSizeBytes) bytes). Received \(request.data.count) bytes."
+            message: "DeepSeek file uploads must not exceed 64 MiB (\(deepSeekGroupedInteger(deepSeekMaximumFileSizeBytes)) bytes). Received \(deepSeekGroupedInteger(request.data.count)) bytes."
         )
     }
 
@@ -160,6 +160,17 @@ private func deepSeekValidateFileUpload(_ request: FileUploadRequest) throws {
         argument: "mediaType",
         message: "DeepSeek file uploads support JPEG, PNG, GIF, and WebP images. Provide a supported media type or a filename ending in .jpg, .jpeg, .png, .gif, or .webp. Received \"\(request.mediaType)\"."
     )
+}
+
+/// Formats like JavaScript's `toLocaleString('en-US')` for integers.
+func deepSeekGroupedInteger(_ value: Int) -> String {
+    let digits = String(value.magnitude)
+    var grouped = ""
+    for (offset, character) in digits.enumerated() {
+        if offset > 0, (digits.count - offset) % 3 == 0 { grouped.append(",") }
+        grouped.append(character)
+    }
+    return value < 0 ? "-" + grouped : grouped
 }
 
 private func deepSeekHasSupportedFileExtension(_ filename: String?) -> Bool {
